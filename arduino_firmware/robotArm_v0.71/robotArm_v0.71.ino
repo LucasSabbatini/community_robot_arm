@@ -107,6 +107,7 @@ void setup()
   stepperRail.setPosition(0);
   #endif
   if (HOME_ON_BOOT) { //HOME DURING SETUP() IF HOME_ON_BOOT ENABLED
+    Logger::logINFO("HOMING");
     homeSequence(); 
     Logger::logINFO("ROBOT ONLINE");
   } else {
@@ -143,7 +144,7 @@ void loop() {
     stepperRail.update();
   #endif
   fan.update();
-
+  
   if (!queue.isFull()) {
     if (command.handleGcode()) {
       queue.push(command.getCmd());
@@ -268,16 +269,20 @@ void setStepperEnable(bool enable){
 
 void homeSequence(){
   setStepperEnable(false);
-  fan.enable(true);
+//  fan.enable(true);
   if (HOME_Y_STEPPER && HOME_X_STEPPER){
-    endstopY.home(!INVERSE_Y_STEPPER);
+    Serial.println("endstopY.home");
+    
+    Serial.println("endstopX.home");
     endstopX.home(!INVERSE_X_STEPPER);
+    endstopY.home(!INVERSE_Y_STEPPER);
   } else {
     setStepperEnable(true);
     endstopY.homeOffset(!INVERSE_Y_STEPPER);
     endstopX.homeOffset(!INVERSE_X_STEPPER);
   }
   if (HOME_Z_STEPPER){
+    Serial.println("homing Z");
     endstopZ.home(INVERSE_Z_STEPPER);
   }
   #if RAIL
