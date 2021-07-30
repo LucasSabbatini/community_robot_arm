@@ -108,7 +108,8 @@ void setup()
   #endif
   if (HOME_ON_BOOT) { //HOME DURING SETUP() IF HOME_ON_BOOT ENABLED
     Logger::logINFO("HOMING");
-    homeSequence(); 
+    // homeSequence(); 
+    homeSequence_Lucas();
     Logger::logINFO("ROBOT ONLINE");
   } else {
     setStepperEnable(false); //ROBOT ADJUSTABLE BY HAND AFTER TURNING ON
@@ -269,13 +270,12 @@ void setStepperEnable(bool enable){
 
 void homeSequence(){
   setStepperEnable(false);
-//  fan.enable(true);
+  fan.enable(true);
   if (HOME_Y_STEPPER && HOME_X_STEPPER){
-    Serial.println("endstopY.home");
-    
-    Serial.println("endstopX.home");
+
     endstopX.home(!INVERSE_X_STEPPER);
     endstopY.home(!INVERSE_Y_STEPPER);
+
   } else {
     setStepperEnable(true);
     endstopY.homeOffset(!INVERSE_Y_STEPPER);
@@ -324,6 +324,64 @@ void homeSequence_UNO(){
   interpolator.setInterpolation(INITIAL_X, INITIAL_Y, INITIAL_Z, INITIAL_E0, INITIAL_X, INITIAL_Y, INITIAL_Z, INITIAL_E0);
   Logger::logINFO("HOMING COMPLETE");
 }
+
+void homeSequence_Lucas(){
+  setStepperEnable(false);
+  // fan.enable(true);
+  if (HOME_Y_STEPPER && HOME_X_STEPPER){
+
+    // endstopX.home(!INVERSE_X_STEPPER);
+    // endstopY.home(!INVERSE_Y_STEPPER);
+    int x_endstop_state, y_endstop_state, z_endstop_state;
+    x_endstop_state = digitalRead(endstopX.getMinPin());
+    y_endstop_state = digitalRead(endstopY.getMinPin());
+    z_endstop_state = digitalRead(endstopZ.getMinPin());
+
+    endstopX.setPins(!INVERSE_X_STEPPER);
+    endstopY.setPins(!INVERSE_Y_STEPPER);
+    endstopZ.setPins(!INVERSE_Z_STEPPER);
+    
+    delayMicroseconds(5);
+    while (!x_endstop_state || !y_endstop_state || !z_endstop_state) {
+      if (!x_endstop_state) {
+        digitalWrite(endstopX.getStepPin(), HIGH);
+        digitalWrite(endstopX.getStepPin(), LOW);
+        x_endstop_state = digitalRead(endstopX.getMinPin());
+      }
+      if (!y_endstop_state) {
+        digitalWrite(endstopY.getStepPin(), HIGH);
+        digitalWrite(endstopY.getStepPin(), LOW);
+        y_endstop_state = digitalRead(endstopY.getMinPin());
+      }
+      if (!z_endstop_state) {
+        digitalWrite(endstopZ.getStepPin(), HIGH);
+        digitalWrite(endstopZ.getStepPin(), LOW);
+        z_endstop_state = digitalRead(endstopZ.getMinPin());
+      }
+      Serial.println(BoolT)
+//      delayMicroseconds(HOME_DWELL);
+      delayMicroseconds(200);
+    }
+
+   endstopX.homeOffset(!INVERSE_X_STEPPER);
+   endstopX.homeOffset(!INVERSE_Y_STEPPER);
+   endstopX.homeOffset(!INVERSE_Z_STEPPER);
+
+//    // Don't know what this is
+//    if (swap_pin == true){
+//      pinMode(min_pin, OUTPUT);
+//      delayMicroseconds(5);
+//    }
+  }
+  #if RAIL
+    if (HOME_E0_STEPPER){
+      endstopE0.home(!INVERSE_E0_STEPPER);
+    }
+  #endif
+  interpolator.setInterpolation(INITIAL_X, INITIAL_Y, INITIAL_Z, INITIAL_E0, INITIAL_X, INITIAL_Y, INITIAL_Z, INITIAL_E0);
+  Logger::logINFO("HOMING COMPLETE");
+}
+
 
 #if BOARD_CHOICE == WEMOSD1R32 && ESP32_PS4_CONTROLLER
 void ps4_controller_loop(){

@@ -7,8 +7,13 @@ class Endstop {
     void home(bool dir);
     void homeOffset(bool dir);
     void oneStepToEndstop(bool dir);
+    void setPins(bool dir);
     bool state();
     bool bState;
+    int getMinPin() const { return min_pin; }
+    int getDirPin() const { return dir_pin; }
+    int getStepPin() const { return step_pin; }
+    int getEnPin() const { return en_pin; }
 
   private:
     int min_pin;
