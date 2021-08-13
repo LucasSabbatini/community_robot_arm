@@ -68,7 +68,7 @@ Endstop endstopY(Y_MIN_PIN, Y_DIR_PIN, Y_STEP_PIN, Y_ENABLE_PIN, Y_MIN_INPUT, Y_
 #if BOARD_CHOICE == WEMOSD1R32
   Endstop endstopZ(Z_MIN_PIN, Z_DIR_PIN, Z_STEP_PIN, Z_ENABLE_PIN, Z_MIN_INPUT, Z_HOME_STEPS, HOME_DWELL, true);
 #else
-  Endstop endstopZ(Z_MIN_PIN, Z_DIR_PIN, Z_STEP_PIN, Z_ENABLE_PIN, Z_MIN_INPUT, Z_HOME_STEPS, HOME_DWELL, false);
+  Endstop endstopZ(Z_MIN_PIN, Z_DIR_PIN, Z_STEP_PIN, Z_ENABLE_PIN, Z_MIN_INPUT, Z_HOME_STEPS, HOME_DWELL_Z, false);
 #endif
 
 //EQUIPMENT OBJECTS
@@ -107,9 +107,7 @@ void setup()
   stepperRail.setPosition(0);
   #endif
   if (HOME_ON_BOOT) { //HOME DURING SETUP() IF HOME_ON_BOOT ENABLED
-    Logger::logINFO("HOMING");
-    // homeSequence(); 
-    homeSequence_Lucas();
+    homeSequence(); 
     Logger::logINFO("ROBOT ONLINE");
   } else {
     setStepperEnable(false); //ROBOT ADJUSTABLE BY HAND AFTER TURNING ON
@@ -268,7 +266,7 @@ void setStepperEnable(bool enable){
   fan.enable(enable);
 }
 
-void homeSequence(){
+void homeSequence_old(){
   setStepperEnable(false);
   fan.enable(true);
   if (HOME_Y_STEPPER && HOME_X_STEPPER){
@@ -325,10 +323,12 @@ void homeSequence_UNO(){
   Logger::logINFO("HOMING COMPLETE");
 }
 
-void homeSequence_Lucas(){
-  setStepperEnable(false);
-  // fan.enable(true);
-  if (HOME_Y_STEPPER && HOME_X_STEPPER){
+void homeSequence(){
+  setStepperEnable(false);  
+  fan.enable(true);
+  Logger::logINFO("HOMING..")
+  delay(2000);
+  if (HOME_Y_STEPPER && HOME_X_STEPPER && HOME_Z_STEPPER){
 
     // endstopX.home(!INVERSE_X_STEPPER);
     // endstopY.home(!INVERSE_Y_STEPPER);
@@ -358,20 +358,19 @@ void homeSequence_Lucas(){
         digitalWrite(endstopZ.getStepPin(), LOW);
         z_endstop_state = digitalRead(endstopZ.getMinPin());
       }
-      Serial.println(BoolT)
-//      delayMicroseconds(HOME_DWELL);
-      delayMicroseconds(200);
-    }
+      delayMicroseconds(HOME_DWELL);
+      }
 
-   endstopX.homeOffset(!INVERSE_X_STEPPER);
-   endstopX.homeOffset(!INVERSE_Y_STEPPER);
-   endstopX.homeOffset(!INVERSE_Z_STEPPER);
+    delay(700);  
+    endstopX.homeOffset(!INVERSE_X_STEPPER);
+    endstopY.homeOffset(!INVERSE_Y_STEPPER);
+    endstopZ.homeOffset(!INVERSE_Z_STEPPER);
 
-//    // Don't know what this is
-//    if (swap_pin == true){
-//      pinMode(min_pin, OUTPUT);
-//      delayMicroseconds(5);
-//    }
+   // Don't know what this is
+//   if (swap_pin == true){
+//     pinMode(min_pin, OUTPUT);
+//     delayMicroseconds(5);
+//   }
   }
   #if RAIL
     if (HOME_E0_STEPPER){

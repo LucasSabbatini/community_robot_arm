@@ -15,18 +15,12 @@ Command::Command() {
 }
 
 bool Command::handleGcode() {
-  if (Serial.available()) {
-    char c = Serial.read();
-    if (c == '\n') {
-       return false; 
-    }
-    if (c == '\r') {
-       bool b = processMessage(message);
-       message = "";
-       return b;
-    } else {
-       message += c; 
-    }
+  String c = Serial.readString();
+  if (c.length() == 0) {
+    return false;
+  } else {
+    bool b = processMessage(c); 
+    return b;
   }
   return false;
 }
