@@ -326,7 +326,7 @@ void homeSequence_UNO(){
 void homeSequence(){
   setStepperEnable(false);  
   fan.enable(true);
-  Logger::logINFO("HOMING..")
+  Logger::logINFO("HOMING..");
   delay(2000);
   if (HOME_Y_STEPPER && HOME_X_STEPPER && HOME_Z_STEPPER){
 
