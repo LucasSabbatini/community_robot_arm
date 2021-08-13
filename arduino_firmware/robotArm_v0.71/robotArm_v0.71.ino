@@ -330,8 +330,6 @@ void homeSequence(){
   delay(2000);
   if (HOME_Y_STEPPER && HOME_X_STEPPER && HOME_Z_STEPPER){
 
-    // endstopX.home(!INVERSE_X_STEPPER);
-    // endstopY.home(!INVERSE_Y_STEPPER);
     int x_endstop_state, y_endstop_state, z_endstop_state;
     x_endstop_state = digitalRead(endstopX.getMinPin());
     y_endstop_state = digitalRead(endstopY.getMinPin());
